@@ -6,7 +6,7 @@ navbar:
   - text: "Home"
     href: basic-sql.html
   - text: "About"
-    href: about.html
+    href: index.html
 output:
   html_document:
     theme: darkly
