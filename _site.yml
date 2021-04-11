@@ -1,12 +1,12 @@
-name: "cars"
+name: "Basic SQL"
 output_dir: "docs"
 navbar:
-  title: "Cars"
+  title: "Basic SQL"
   left:
   - text: "Home"
-    href: index.html
-  - text: "Speed and Distance"
-    href: speed-and-distance.html
+    href: basic-sql.html
+  - text: "About"
+    href: about.html
 output:
   html_document:
     theme: darkly
