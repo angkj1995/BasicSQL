@@ -9,9 +9,8 @@ navbar:
     href: about.html
 
   right:
-  - icon: fab fa-linkedin fa-lg
+  - icon: fa-linkedin
     href: https://www.linkedin.com/in/kang-jie-ang/
 output:
   html_document:
-    theme: paper
-    css: 'styles.css'
+    theme: flatly
