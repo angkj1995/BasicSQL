@@ -7,9 +7,11 @@ navbar:
     href: index.html
   - text: "About"
     href: about.html
+
   right:
   - icon: fab fa-linkedin fa-lg
     href: https://www.linkedin.com/in/kang-jie-ang/
 output:
   html_document:
-    theme: flatly
+    theme: paper
+    css: 'styles.css'
