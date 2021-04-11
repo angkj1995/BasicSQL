@@ -217,7 +217,7 @@ datatable(df,options=list(scrollX=T))
 |UCASE         | Return uppercase of all values in column   |
 |LCASE     | Return lowercase of all values in column|
 
-Apart from being applies in the SELECT clause, functions can also be applied in the WHERE/HAVING clause. For instance, we want to filter the community areas from above such that they have an average safety score of at least 80
+Apart from being applies in the SELECT clause, functions can also be applied in the left side of WHERE/HAVING clause. For instance, we want to filter the community areas from above such that they have an average safety score of at least 80
 
 ```{r SCALER}
 syntax = 'SELECT AVG(SAFETY_SCORE), COMMUNITY_AREA_NAME FROM CHICAGO_PUBLIC_SCHOOLS GROUP BY COMMUNITY_AREA_NAME HAVING AVG(SAFETY_SCORE) >= 80'
@@ -225,7 +225,63 @@ df = sqldf(syntax)
 datatable(df,options=list(scrollX=T))
 ```
 
+## Sub-Queries and Nested selects
 
+### Using Sub-Queries as a predicate
+Aggregate functions such as AVG() cannot be applied on the right side of a WHERE clause. If we want to query for schools with an above average safety score, the following query will fail
+```{r fail}
+syntax = 'SELECT SAFETY_SCORE, NAME_OF_SCHOOL FROM CHICAGO_PUBLIC_SCHOOLS WHERE SAFETY_SCORE > AVG(SAFETY_SCORE)'
+```
+A sub-query is needed to solve this. This means adding a query as the right side of a WHERE clause. THe following query allows us to find schools with an above average safety score
+```{r sq predicate}
+syntax = 'SELECT SAFETY_SCORE, NAME_OF_SCHOOL FROM CHICAGO_PUBLIC_SCHOOLS WHERE SAFETY_SCORE > (SELECT AVG(SAFETY_SCORE) FROM CHICAGO_PUBLIC_SCHOOLS)'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+### Using Sub-Queries in a new column
+Similar to the previous example, aggregate functions also cannot be applied as a new column if there is no aggregation occurring. For example, if we want to compare the safety score of each school to the average safety score, the following query will fail
+```{r fail2}
+syntax = 'SELECT SAFETY_SCORE, AVG(SAFETY_SCORE), NAME_OF_SCHOOL FROM CHICAGO_PUBLIC_SCHOOLS WHERE SAFETY_SCORE > AVG(SAFETY_SCORE)'
+```
+Instead, a sub-query like the following will have to be used
+```{r sq new col}
+syntax = 'SELECT SAFETY_SCORE, (SELECT AVG(SAFETY_SCORE) FROM CHICAGO_PUBLIC_SCHOOLS) AS AVG_SAFETY_SCORE, NAME_OF_SCHOOL FROM CHICAGO_PUBLIC_SCHOOLS'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+### Using Sub-Queries as a Derived Table
+As derived tables, sub-queries can be useful when it comes to dealing with multiple tables. Briefly, it involves turning a sub-query into an entirely new table to be queried. The syntax is _SELECT * FROM_ __(SELECT COLA, COLB FROM TABLE)__ _AS NEWTABLE_. The usefulness is not visible whend dealing with single tables
+```{r sq derived}
+syntax = 'SELECT * FROM (SELECT NAME_OF_SCHOOL, SAFETY_SCORE FROM CHICAGO_PUBLIC_SCHOOLS) AS SCHOOL'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+
+## Working with multiple tables
+### Via subqueries
+In CHICAGO_CRIME, there is a field called COMMUNITY_AREA_NUMBER, but there is no COMMUNITY_AREA_NAME. In order to filter for names, we can utilise the CENSUS_DATA table, which contains both COMMUNITY_AREA_NUMBER and COMMUNITY_AREA_NAME. Suppose we are interested in finding crimes that happen only in Lincoln Park. We can then use the following sub-query
+```{r multi sub}
+syntax = 'SELECT CASE_NUMBER, COMMUNITY_AREA_NUMBER FROM CHICAGO_CRIME_DATA WHERE COMMUNITY_AREA_NUMBER IN (SELECT COMMUNITY_AREA_NUMBER FROM CENSUS_DATA WHERE COMMUNITY_AREA_NAME = "Lincoln Park")'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+### Via implicit joins
+We will not be exploring full joins as they tend to give a result set containing more rows than in both tables individually. To limit a join result, we can specify a clause to matching the 2 joining columns. Note that we can use __aliases__ for table names
+
+We can also add columns from the second table (if we are interested to see the community area where the crime occured), by specifing the __aliases and columns__ in select
+```{r implicit}
+syntax = 'SELECT  A.CASE_NUMBER, A.COMMUNITY_AREA_NUMBER, B.COMMUNITY_AREA_NAME FROM CHICAGO_CRIME_DATA AS A, CENSUS_DATA AS B WHERE A.COMMUNITY_AREA_NUMBER = B.COMMUNITY_AREA_NUMBER'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+There are no more duplicates, and the crimes that do not have a community area number assigned are also not in the new implicit join
+
+## Conclusion
+I hope this tutorial has been useful! While SQL is a querying language and is not used for modeling, it is an important skill to learn for data scientists as obtaining data from databases is always the first step for any data science project. SQL is needed to communicate with databases, and is becoming standard use in data science
 
 
 
