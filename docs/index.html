@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Basic SQL Tutorial</title>
+
+<script src="site_libs/jquery-1.12.4/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.15/datatables.js"></script>
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.1.0.1/css/crosstalk.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.1.0.1/js/crosstalk.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Basic SQL</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Basic SQL Tutorial</h1>
+
+</div>
+
+
+<p>This tutorial provides a rundown on SQL commands to query relational databases. The content of this tutorial is inspired by IBM’s <a href="https://www.coursera.org/learn/sql-data-science">Databases and SQL for Data Science with Python</a> on Coursera</p>
+<div id="dataset" class="section level2">
+<h2>Dataset</h2>
+<p>The data for this tutorial are from Chicago’s Data Portal, consisting of the following:</p>
+<ol style="list-style-type: decimal">
+<li><a href="https://data.cityofchicago.org/Health-Human-Services/Census-Data-Selected-socioeconomic-indicators-in-C/kn9c-c2s2">Socioeconomic Indicators in Chicago</a>
+<ul>
+<li>This is a cross-sectional (single-year) data containing socioeconomic indicators (<strong>Crowding, Poverty, Unemployment, Age distribution, Income</strong>) for each community area in Chicago</li>
+</ul></li>
+<li><a href="https://data.cityofchicago.org/Education/Chicago-Public-Schools-Progress-Report-Cards-2011-/9xs2-f89t">Chicago Public Schools</a>
+<ul>
+<li>This is a cross-section (single-year) data containing school performance indicators (<strong>Health Certification, Safety Score, College Enrollment</strong>) for each school in each comunity area in Chicago</li>
+</ul></li>
+<li><a href="https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2">Chicago Crime Data</a>
+<ul>
+<li>This is a panel (multi-year) data containing crime information (<strong>Crime type, Arrest indicator</strong>) for each crime that occured in Chicago</li>
+</ul></li>
+</ol>
+<div id="download-csv-data" class="section level3">
+<h3>Download (csv data)</h3>
+<p>As the data from the three sources are very large, a smaller subset is used for this tutorial instead, with more database-friendly column names</p>
+<ol style="list-style-type: decimal">
+<li><a href="https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DB0201EN-SkillsNetwork/labs/FinalModule_Coursera/data/Census_Data_-_Selected_socioeconomic_indicators_in_Chicago__2008___2012-v2.csv">Census Dataset</a> (read as <strong>CENSUS_DATA</strong>)</li>
+<li><a href="https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DB0201EN-SkillsNetwork/labs/FinalModule_Coursera/data/Chicago_Public_Schools_-_Progress_Report_Cards__2011-2012-v3.csv">Chicago Public School</a> (read as <strong>CHICAGO_PUBLIC_SCHOOLS</strong>)</li>
+<li><a href="https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DB0201EN-SkillsNetwork/labs/FinalModule_Coursera/data/Chicago_Crime_Data-v2.csv">Chicago Crime Data</a> (<strong>CHICAGO_CRIME_DATA</strong>)</li>
+</ol>
+</div>
+</div>
+<div id="reading-data" class="section level2">
+<h2>Reading data</h2>
+<p>As there is no live database for this tutorial, the datasets will have to be read in as local dataframes. We will also use the <strong>sqldf</strong> library to practice SQL queries</p>
+<pre class="r"><code>CENSUS_DATA = read.csv(&#39;Census_Data_-_Selected_socioeconomic_indicators_in_Chicago__2008___2012-v2.csv&#39;)
+CHICAGO_PUBLIC_SCHOOLS = read.csv(&#39;Chicago_Public_Schools_-_Progress_Report_Cards__2011-2012-v3.csv&#39;)
+CHICAGO_CRIME_DATA = read.csv(&#39;Chicago_Crime_Data-v2.csv&#39;)
+library(sqldf)
+library(DT)</code></pre>
+<div id="data-preview" class="section level3">
+<h3>Data preview</h3>
+<p>Now, we look at some of the variables in the data that we have</p>
+<div id="census-preview" class="section level4">
+<h4>Census preview</h4>
+<div id="htmlwidget-4e654b6c14942b53d974" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4e654b6c14942b53d974">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[1,2,3,4,5,6],["Rogers Park","West Ridge","Uptown","Lincoln Square","North Center","Lake View"],[7.7,7.8,3.8,3.4,0.3,1.1],[23.6,17.2,24,10.9,7.5,11.4],[8.7,8.8,8.9,8.2,5.2,4.7],[18.2,20.8,11.8,13.4,4.5,2.6],[27.5,38.5,22.2,25.5,26.2,17],[23939,23040,35787,37524,57123,60058],[39,46,20,17,6,5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>COMMUNITY_AREA_NUMBER<\/th>\n      <th>COMMUNITY_AREA_NAME<\/th>\n      <th>PERCENT.OF.HOUSING.CROWDED<\/th>\n      <th>PERCENT.HOUSEHOLDS.BELOW.POVERTY<\/th>\n      <th>PERCENT.AGED.16..UNEMPLOYED<\/th>\n      <th>PERCENT.AGED.25..WITHOUT.HIGH.SCHOOL.DIPLOMA<\/th>\n      <th>PERCENT.AGED.UNDER.18.OR.OVER.64<\/th>\n      <th>PER_CAPITA_INCOME<\/th>\n      <th>HARDSHIP_INDEX<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"columnDefs":[{"className":"dt-right","targets":[1,3,4,5,6,7,8,9]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="school-preview" class="section level4">
+<h4>School preview</h4>
+<div id="htmlwidget-780c658c1116e88a6cc3" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-780c658c1116e88a6cc3">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[610038,610281,610185,609993,610513,610212],["Abraham Lincoln Elementary School","Adam Clayton Powell Paideia Community Academy Elementary School","Adlai E Stevenson Elementary School","Agustin Lara Elementary Academy","Air Force Academy High School","Albany Park Multicultural Academy"],["ES","ES","ES","ES","HS","MS"],["615 W Kemper Pl ","7511 S South Shore Dr ","8010 S Kostner Ave ","4619 S Wolcott Ave ","3630 S Wells St ","4929 N Sawyer Ave "],["Chicago","Chicago","Chicago","Chicago","Chicago","Chicago"],["IL","IL","IL","IL","IL","IL"],[60614,60649,60652,60609,60609,60625],["(773) 534-5720","(773) 535-6650","(773) 535-2280","(773) 535-4389","(773) 535-1590","(773) 534-5108"],["http://schoolreports.cps.edu/SchoolProgressReport_Eng/Spring2011Eng_610038.pdf","http://schoolreports.cps.edu/SchoolProgressReport_Eng/Spring2011Eng_610281.pdf","http://schoolreports.cps.edu/SchoolProgressReport_Eng/Spring2011Eng_610185.pdf","http://schoolreports.cps.edu/SchoolProgressReport_Eng/Spring2011Eng_609993.pdf","http://schoolreports.cps.edu/SchoolProgressReport_Eng/Spring2011Eng_610513.pdf","http://schoolreports.cps.edu/SchoolProgressReport_Eng/Spring2011Eng_610212.pdf"],["Fullerton Elementary Network","Skyway Elementary Network","Midway Elementary Network","Pershing Elementary Network","Southwest Side High School Network","O'Hare Elementary Network"],["NORTH-NORTHWEST SIDE COLLABORATIVE","SOUTH SIDE COLLABORATIVE","SOUTHWEST SIDE COLLABORATIVE","SOUTHWEST SIDE COLLABORATIVE","SOUTHWEST SIDE COLLABORATIVE","NORTH-NORTHWEST SIDE COLLABORATIVE"],["No","No","No","No","NDA","Yes"],["Standard","Track_E","Standard","Track_E","Standard","Standard"],["Not on Probation","Not on Probation","Not on Probation","Not on Probation","Not on Probation","Not on Probation"],["Level 1","Level 1","Level 2","Level 1","Not Enough Data","Level 1"],["Yes","No","No","No","Yes","No"],["Very Strong","Average","Strong","Average","Average","Strong"],[99,54,61,56,49,66],["Very Strong","Strong","NDA","Average","Strong","Weak"],["99","66","NDA","44","60","37"],["Strong","Strong","Average","Average","Strong","Strong"],[74,74,50,45,60,66],["Strong","Very Strong","Weak","Weak","Average","Strong"],[66,84,36,37,55,71],["Strong","Strong","NDA","Strong","Average","Average"],["65","63","NDA","65","45","43"],["Strong","Strong","NDA","Average","Average","Average"],["70","76","NDA","48","54","50"],["Strong","Weak","Average","Average","Average","Weak"],["56","46","47","53","53","46"],["Average","Average","Weak","Strong","Average","Average"],["47","50","41","58","49","51"],["96.00%","95.60%","95.70%","95.50%","93.30%","97.00%"],[2,15.7,2.3,10.4,15.6,2.3],["96.40%","95.30%","94.70%","95.80%","96.90%","96.90%"],["95.80%","100.00%","98.30%","100.00%","100.00%","100.00%"],["80.1","62.4","53.7","76.9","NDA","NDA"],["43.3","51.7","26.6","NDA","NDA","NDA"],["89.6","21.9","38.3","26","NDA","NDA"],["84.9","15.1","34.7","24.7","NDA","NDA"],["60.7","29","43.7","61.8","NDA","NDA"],["62.6","42.8","57.3","49.7","NDA","NDA"],["81.9","38.5","48.8","39.2","NDA","60.7"],["85.2","27.4","39.2","27.2","NDA","39.8"],["52","44.8","46.8","69.7","NDA","53.7"],["62.4","42.7","44","60.6","NDA","59.8"],["66.3","14.1","7.5","9.1","NDA","17.5"],["77.9","34.4","21.9","18.2","NDA","20.8"],[69.7,16.8,18.3,11.1,null,34.5],[64.4,16.5,15.5,9.6,null,15.6],[0.2,0.7,-0.9,0.9,null,0.2],[0.9,1.4,-1,2.4,null,0.3],["Yellow","Green","Red","Green","NDA","Yellow"],["Green","Green","Red","Green","NDA","Yellow"],["67.1","17.2","NDA","42.9","NDA","29.2"],["54.5","27.3","NDA","25","NDA","50"],["NDA","NDA","NDA","NDA","14.6","NDA"],["NDA","NDA","NDA","NDA","14.8","NDA"],["NDA","NDA","NDA","NDA","NDA","NDA"],["NDA","NDA","NDA","NDA","16","NDA"],["NDA","NDA","NDA","NDA","1.4","NDA"],["NDA","NDA","NDA","NDA","NDA","NDA"],["NDA","NDA","NDA","NDA","NDA","NDA"],["NDA","NDA","NDA","NDA","NDA","NDA"],["NDA","NDA","NDA","NDA","NDA","NDA"],["NDA","NDA","NDA","NDA","NDA","NDA"],[813,521,1324,556,302,266],[33,46,44,42,40,31],["NDA","NDA","NDA","NDA","91.8","NDA"],[1171699.458,1196129.985,1148427.165,1164504.29,1175177.622,1153858.196],[1915829.428,1856209.466,1851012.215,1873959.199,1880745.126,1932691.891],[41.92449696,41.76032435,41.74711093,41.8097569,41.82814609,41.9711433],[-87.64452163,-87.55673627,-87.73170248,-87.6721446,-87.63279369,-87.70962725],[7,43,70,61,34,14],["LINCOLN PARK","SOUTH SHORE","ASHBURN","NEW CITY","ARMOUR SQUARE","ALBANY PARK"],[43,7,13,20,11,39],[18,4,8,9,9,17],["(41.92449696, -87.64452163)","(41.76032435, -87.55673627)","(41.74711093, -87.73170248)","(41.8097569, -87.6721446)","(41.82814609, -87.63279369)","(41.9711433, -87.70962725)"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>School.ID<\/th>\n      <th>NAME_OF_SCHOOL<\/th>\n      <th>Elementary..Middle..or.High.School<\/th>\n      <th>Street.Address<\/th>\n      <th>City<\/th>\n      <th>State<\/th>\n      <th>ZIP.Code<\/th>\n      <th>Phone.Number<\/th>\n      <th>Link<\/th>\n      <th>Network.Manager<\/th>\n      <th>Collaborative.Name<\/th>\n      <th>Adequate.Yearly.Progress.Made.<\/th>\n      <th>Track.Schedule<\/th>\n      <th>CPS.Performance.Policy.Status<\/th>\n      <th>CPS.Performance.Policy.Level<\/th>\n      <th>HEALTHY_SCHOOL_CERTIFIED<\/th>\n      <th>Safety.Icon<\/th>\n      <th>SAFETY_SCORE<\/th>\n      <th>Family.Involvement.Icon<\/th>\n      <th>Family.Involvement.Score<\/th>\n      <th>Environment.Icon<\/th>\n      <th>Environment.Score<\/th>\n      <th>Instruction.Icon<\/th>\n      <th>Instruction.Score<\/th>\n      <th>Leaders.Icon<\/th>\n      <th>Leaders.Score<\/th>\n      <th>Teachers.Icon<\/th>\n      <th>Teachers.Score<\/th>\n      <th>Parent.Engagement.Icon<\/th>\n      <th>Parent.Engagement.Score<\/th>\n      <th>Parent.Environment.Icon<\/th>\n      <th>Parent.Environment.Score<\/th>\n      <th>AVERAGE_STUDENT_ATTENDANCE<\/th>\n      <th>Rate.of.Misconducts..per.100.students.<\/th>\n      <th>Average.Teacher.Attendance<\/th>\n      <th>Individualized.Education.Program.Compliance.Rate<\/th>\n      <th>Pk.2.Literacy..<\/th>\n      <th>Pk.2.Math..<\/th>\n      <th>Gr3.5.Grade.Level.Math..<\/th>\n      <th>Gr3.5.Grade.Level.Read..<\/th>\n      <th>Gr3.5.Keep.Pace.Read..<\/th>\n      <th>Gr3.5.Keep.Pace.Math..<\/th>\n      <th>Gr6.8.Grade.Level.Math..<\/th>\n      <th>Gr6.8.Grade.Level.Read..<\/th>\n      <th>Gr6.8.Keep.Pace.Math.<\/th>\n      <th>Gr6.8.Keep.Pace.Read..<\/th>\n      <th>Gr.8.Explore.Math..<\/th>\n      <th>Gr.8.Explore.Read..<\/th>\n      <th>ISAT.Exceeding.Math..<\/th>\n      <th>ISAT.Exceeding.Reading..<\/th>\n      <th>ISAT.Value.Add.Math<\/th>\n      <th>ISAT.Value.Add.Read<\/th>\n      <th>ISAT.Value.Add.Color.Math<\/th>\n      <th>ISAT.Value.Add.Color.Read<\/th>\n      <th>Students.Taking..Algebra..<\/th>\n      <th>Students.Passing..Algebra..<\/th>\n      <th>X9th.Grade.EXPLORE..2009.<\/th>\n      <th>X9th.Grade.EXPLORE..2010.<\/th>\n      <th>X10th.Grade.PLAN..2009.<\/th>\n      <th>X10th.Grade.PLAN..2010.<\/th>\n      <th>Net.Change.EXPLORE.and.PLAN<\/th>\n      <th>X11th.Grade.Average.ACT..2011.<\/th>\n      <th>Net.Change.PLAN.and.ACT<\/th>\n      <th>College.Eligibility..<\/th>\n      <th>Graduation.Rate..<\/th>\n      <th>College.Enrollment.Rate..<\/th>\n      <th>COLLEGE_ENROLLMENT<\/th>\n      <th>General.Services.Route<\/th>\n      <th>Freshman.on.Track.Rate..<\/th>\n      <th>X_COORDINATE<\/th>\n      <th>Y_COORDINATE<\/th>\n      <th>Latitude<\/th>\n      <th>Longitude<\/th>\n      <th>COMMUNITY_AREA_NUMBER<\/th>\n      <th>COMMUNITY_AREA_NAME<\/th>\n      <th>Ward<\/th>\n      <th>Police.District<\/th>\n      <th>Location<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"columnDefs":[{"className":"dt-right","targets":[1,7,18,22,24,34,49,50,51,52,67,68,70,71,72,73,74,76,77]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="crime-preview" class="section level4">
+<h4>Crime preview</h4>
+<div id="htmlwidget-616a5d06532bda60b612" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-616a5d06532bda60b612">{"x":{"filter":"none","data":[["1","2","3","4","5","6"],[3512276,3406613,8002131,7903289,10402076,7732712],["HK587712","HK456306","HT233595","HT133522","HZ138551","HS540106"],["08/28/2004 05:50:56 PM","06/26/2004 12:40:00 PM","04/04/2011 05:45:00 AM","12/30/2010 04:30:00 PM","02/02/2016 07:30:00 PM","09/29/2010 07:59:00 AM"],["047XX S KEDZIE AVE","009XX N CENTRAL PARK AVE","043XX S WABASH AVE","083XX S KINGSTON AVE","033XX W 66TH ST","006XX W CHICAGO AVE"],["890","820","820","840","820","810"],["THEFT","THEFT","THEFT","THEFT","THEFT","THEFT"],["FROM BUILDING","$500 AND UNDER","$500 AND UNDER","FINANCIAL ID THEFT: OVER $300","$500 AND UNDER","OVER $500"],["SMALL RETAIL STORE","OTHER","NURSING HOME/RETIREMENT HOME","RESIDENCE","ALLEY","PARKING LOT/GARAGE(NON.RESID.)"],[false,false,false,false,false,false],[false,false,false,false,false,false],[911,1112,221,423,831,1323],[9,11,2,4,8,12],[14,27,3,7,15,27],[58,23,38,46,66,24],["6","6","6","6","6","6"],[1155838,1152206,1177436,1194622,1155240,1171668],[1873050,1906127,1876313,1850125,1860661,1905607],[2004,2004,2011,2010,2016,2010],["02/10/2018 03:50:01 PM","02/28/2018 03:56:25 PM","02/10/2018 03:50:01 PM","02/10/2018 03:50:01 PM","02/10/2018 03:50:01 PM","02/10/2018 03:50:01 PM"],[41.8074405,41.89827996,41.81593313,41.74366532,41.7734553,41.89644677],[-87.70395585,-87.71640551,-87.62464213,-87.56246276,-87.70648047,-87.64493868],["(41.8074405, -87.703955849)","(41.898279962, -87.716405505)","(41.815933131, -87.624642127)","(41.743665322, -87.562462756)","(41.773455295, -87.706480471)","(41.896446772, -87.644938678)"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ID<\/th>\n      <th>CASE_NUMBER<\/th>\n      <th>DATE<\/th>\n      <th>BLOCK<\/th>\n      <th>IUCR<\/th>\n      <th>PRIMARY_TYPE<\/th>\n      <th>DESCRIPTION<\/th>\n      <th>LOCATION_DESCRIPTION<\/th>\n      <th>ARREST<\/th>\n      <th>DOMESTIC<\/th>\n      <th>BEAT<\/th>\n      <th>DISTRICT<\/th>\n      <th>WARD<\/th>\n      <th>COMMUNITY_AREA_NUMBER<\/th>\n      <th>FBICODE<\/th>\n      <th>X_COORDINATE<\/th>\n      <th>Y_COORDINATE<\/th>\n      <th>YEAR<\/th>\n      <th>UPDATEDON<\/th>\n      <th>LATITUDE<\/th>\n      <th>LONGITUDE<\/th>\n      <th>LOCATION<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"columnDefs":[{"className":"dt-right","targets":[1,11,12,13,14,16,17,18,20,21]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
+<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+<pre class="r"><code>summary(cars)</code></pre>
+<pre><code>##      speed           dist       
+##  Min.   : 4.0   Min.   :  2.00  
+##  1st Qu.:12.0   1st Qu.: 26.00  
+##  Median :15.0   Median : 36.00  
+##  Mean   :15.4   Mean   : 42.98  
+##  3rd Qu.:19.0   3rd Qu.: 56.00  
+##  Max.   :25.0   Max.   :120.00</code></pre>
+</div>
+</div>
+</div>
+<div id="including-plots" class="section level2">
+<h2>Including Plots</h2>
+<p>You can also embed plots, for example:</p>
+<p><img src="index_files/figure-html/pressure-1.png" width="672" /></p>
+<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

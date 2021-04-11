@@ -1,0 +1,76 @@
+---
+title: "Basic SQL Tutorial"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This tutorial provides a rundown on SQL commands to query relational databases. The content of this tutorial is inspired by IBM's [Databases and SQL for Data Science with Python](https://www.coursera.org/learn/sql-data-science) on Coursera
+
+## Dataset
+
+The data for this tutorial are from Chicago's Data Portal, consisting of the following:
+
+1. [Socioeconomic Indicators in Chicago](https://data.cityofchicago.org/Health-Human-Services/Census-Data-Selected-socioeconomic-indicators-in-C/kn9c-c2s2)
+    * This is a cross-sectional (single-year) data containing socioeconomic indicators (**Crowding, Poverty, Unemployment, Age distribution, Income**) for each community area in Chicago
+2. [Chicago Public Schools](https://data.cityofchicago.org/Education/Chicago-Public-Schools-Progress-Report-Cards-2011-/9xs2-f89t)
+    * This is a cross-section (single-year) data containing school performance indicators (**Health Certification, Safety Score, College Enrollment**) for each school in each comunity area in Chicago
+3. [Chicago Crime Data](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
+    * This is a panel (multi-year) data containing crime information (**Crime type, Arrest indicator**) for each crime that occured in Chicago
+
+### Download (csv data)
+
+As the data from the three sources are very large, a smaller subset is used for this tutorial instead, with more database-friendly column names
+
+1. [Census Dataset](https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DB0201EN-SkillsNetwork/labs/FinalModule_Coursera/data/Census_Data_-_Selected_socioeconomic_indicators_in_Chicago__2008___2012-v2.csv) (read as **CENSUS_DATA**)
+2. [Chicago Public School](https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DB0201EN-SkillsNetwork/labs/FinalModule_Coursera/data/Chicago_Public_Schools_-_Progress_Report_Cards__2011-2012-v3.csv) (read as **CHICAGO_PUBLIC_SCHOOLS**)
+3. [Chicago Crime Data](https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DB0201EN-SkillsNetwork/labs/FinalModule_Coursera/data/Chicago_Crime_Data-v2.csv) (**CHICAGO_CRIME_DATA**)
+
+## Reading data
+
+As there is no live database for this tutorial, the datasets will have to be read in as local dataframes. We will also use the **sqldf** library to practice SQL queries
+```{r read, warning = FALSE,message = FALSE}
+CENSUS_DATA = read.csv('Census_Data_-_Selected_socioeconomic_indicators_in_Chicago__2008___2012-v2.csv')
+CHICAGO_PUBLIC_SCHOOLS = read.csv('Chicago_Public_Schools_-_Progress_Report_Cards__2011-2012-v3.csv')
+CHICAGO_CRIME_DATA = read.csv('Chicago_Crime_Data-v2.csv')
+library(sqldf)
+library(DT)
+```
+
+### Data preview
+
+Now, we look at some of the variables in the data that we have
+
+#### Census preview
+```{r preview,echo=FALSE}
+datatable(head(CENSUS_DATA),options=list(scrollX=T))
+```
+
+#### School preview
+```{r preview2,echo=FALSE}
+datatable(head(CHICAGO_PUBLIC_SCHOOLS),options=list(scrollX=T))
+```
+
+#### Crime preview
+```{r preview3,echo=FALSE}
+datatable(head(CHICAGO_CRIME_DATA),options=list(scrollX=T))
+```
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
