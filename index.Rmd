@@ -107,7 +107,7 @@ More conditions are available here
 ### Other useful expressions
 
 #### COUNT
-COUNT gives the number of rows that match a query. For instance, we want to know how many communities have *PER_CAPITA_INCOME >= 50000*. We can also rename the column name to something we want using **AS**. This will give 6, which is the same number of rows as the previous exampls
+COUNT gives the number of rows that match a query. For instance, we want to know how many communities have *PER_CAPITA_INCOME >= 50000*. We can also rename the column name to something we want using **AS**. This will give 6, which is the same number of rows as the previous example
 ```{r COUNT}
 syntax = 'SELECT COUNT(*) AS NUMBER FROM CENSUS_DATA WHERE PER_CAPITA_INCOME>=50000'
 df = sqldf(syntax)
@@ -175,23 +175,58 @@ df = sqldf(syntax)
 datatable(df,options=list(scrollX=T))
 ```
 
-
-
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+### GROUP BY
+The GROUP BY clause groups results into subsets that have matching values for one (or more) columns. The syntax is _SELECT * FROM TABLE_ __GROUP BY COL__, where COL is the column to be grouped For instance, we want to count the number of crimes that occured at each different location
+```{r GROUP}
+syntax = 'SELECT LOCATION_DESCRIPTION, COUNT(LOCATION_DESCRIPTION) FROM CHICAGO_CRIME_DATA GROUP BY LOCATION_DESCRIPTION'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+#### HAVING restriction
+A restriction can be applied immediately after a GROUP BY clause using HAVING. The syntax is _SELECT * FROM TABLE GROUP BY COL_ __HAVING PREDICATE__. For instance, we only want crime locations where there are at least 20 crimes
+```{r HAVING}
+syntax = 'SELECT LOCATION_DESCRIPTION, COUNT(LOCATION_DESCRIPTION) FROM CHICAGO_CRIME_DATA GROUP BY LOCATION_DESCRIPTION HAVING COUNT(LOCATION_DESCRIPTION) >= 20'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### Built-in functions
+#### Aggregate functions
+
+|         Function|  Result|
+|:-----------------|----:|
+|SUM         | Add all values of column   |
+|MIN         | Return the minimum of column   |
+|MAX         | Return maximum of column   |
+|AVERAGE     | Return average of column|
+
+Example: We want to find the average safety score of schools by their community area
+```{r FUNCTIONS}
+syntax = 'SELECT AVG(SAFETY_SCORE), COMMUNITY_AREA_NAME FROM CHICAGO_PUBLIC_SCHOOLS GROUP BY COMMUNITY_AREA_NAME'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+#### Scaler and String functions
+|         Function|  Result|
+|:-----------------|----:|
+|ROUND         | Round all values in column   |
+|LENGTH         | Return length of all values in column   |
+|UCASE         | Return uppercase of all values in column   |
+|LCASE     | Return lowercase of all values in column|
+
+Apart from being applies in the SELECT clause, functions can also be applied in the WHERE/HAVING clause. For instance, we want to filter the community areas from above such that they have an average safety score of at least 80
+
+```{r SCALER}
+syntax = 'SELECT AVG(SAFETY_SCORE), COMMUNITY_AREA_NAME FROM CHICAGO_PUBLIC_SCHOOLS GROUP BY COMMUNITY_AREA_NAME HAVING AVG(SAFETY_SCORE) >= 80'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+
+
+
+
+
