@@ -1,12 +1,17 @@
 ---
 title: "Basic SQL Tutorial"
+output: 
+  html_document:
+    toc: TRUE
+    toc_depth: 4
+    toc_float: TRUE
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This tutorial provides a rundown on SQL commands to query relational databases. The content of this tutorial is inspired by IBM's [Databases and SQL for Data Science with Python](https://www.coursera.org/learn/sql-data-science) on Coursera
+This tutorial provides a rundown on SQL commands to query relational databases. The content of this tutorial is inspired by IBM's [Databases and SQL for Data Science with Python](https://www.coursera.org/learn/sql-data-science) on Coursera. The tutorial assumes prior knowledge on relational database concepts
 
 ## Dataset
 
@@ -38,24 +43,140 @@ library(sqldf)
 library(DT)
 ```
 
-### Data preview
+Let us take a look at some of the variables in the data that we have
 
-Now, we look at some of the variables in the data that we have
-
-#### Census preview
+### Census preview
 ```{r preview,echo=FALSE}
 datatable(head(CENSUS_DATA),options=list(scrollX=T))
 ```
 
-#### School preview
+### School preview
 ```{r preview2,echo=FALSE}
 datatable(head(CHICAGO_PUBLIC_SCHOOLS),options=list(scrollX=T))
 ```
 
-#### Crime preview
+### Crime preview
 ```{r preview3,echo=FALSE}
 datatable(head(CHICAGO_CRIME_DATA),options=list(scrollX=T))
 ```
+
+## Basic SQL Statements
+
+### SELECT
+SELECT is used to retrieve data from a table. The syntax is __SELECT * FROM TABLE__. This will query the entire table
+```{r SELECT}
+syntax = 'SELECT * FROM CENSUS_DATA'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+#### SELECT specific columns
+We can also use SELECT on specific columns for a table. The syntax is **SELECT COL_A, COL_B FROM TABLE**. This will query only the specified columns for the entire table
+```{r SELECTspecific}
+syntax = 'SELECT COMMUNITY_AREA_NUMBER, COMMUNITY_AREA_NAME FROM CENSUS_DATA'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+#### LIMIT
+LIMIT is used to restrict the number of rows from a data base. The syntax is __SELECT * FROM TABLE LIMIT NUMBER__, where NUMBER is the number of rows required
+```{r SELECTlimit}
+syntax = 'SELECT COMMUNITY_AREA_NUMBER, COMMUNITY_AREA_NAME FROM CENSUS_DATA LIMIT 3'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+### WHERE
+WHERE clauses are used to restrict the selection to subsets only. The syntax is _SELECT * FROM TABLE_ __WHERE PREDICATE__. For instance, we want communities with *PER_CAPITA_INCOME >= 50000*
+```{r WHERE}
+syntax = 'SELECT COMMUNITY_AREA_NUMBER, COMMUNITY_AREA_NAME, PER_CAPITA_INCOME FROM CENSUS_DATA WHERE PER_CAPITA_INCOME>=50000'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+More conditions are available here
+
+|         Condition|  Syntax|
+|:-----------------|----:|
+|Equal to          | =   |
+|Greater than      | >   |
+|Less than         | <   |
+|Greater than or equal to    | >=|
+|Less than or equal to | <=|
+|Not equal to      | <>|
+
+### Other useful expressions
+
+#### COUNT
+COUNT gives the number of rows that match a query. For instance, we want to know how many communities have *PER_CAPITA_INCOME >= 50000*. We can also rename the column name to something we want using **AS**. This will give 6, which is the same number of rows as the previous exampls
+```{r COUNT}
+syntax = 'SELECT COUNT(*) AS NUMBER FROM CENSUS_DATA WHERE PER_CAPITA_INCOME>=50000'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+#### DISTINCT
+DISTINCT removes duplicates from the query. For instance, we want to find the unique types of crime from CHICAGO_CRIME_DATA that occur at GAS STATION locations
+```{r DISTINCT}
+syntax = 'SELECT DISTINCT(PRIMARY_TYPE) AS CRIME_TYPE, LOCATION_DESCRIPTION FROM CHICAGO_CRIME_DATA WHERE LOCATION_DESCRIPTION = "GAS STATION"'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+
+## Advanced SQL Statements
+
+### LIKE string pattern
+
+String patterns are useful when we do not know the exact predicate we need. The syntax is _SELECT * FROM TABLE WHERE_ __PREDICATE LIKE '%B'__  For instance, we want all Community Areas that start with B
+```{r LIKE}
+syntax = 'SELECT COMMUNITY_AREA_NAME FROM CENSUS_DATA WHERE COMMUNITY_AREA_NAME LIKE "B%"'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+### AND ranges
+
+We can also select results where the predicate is between a range. Suppose we want Community Areas where HARDSHIP_INDEX is between 1 to 10
+```{r AND}
+syntax = 'SELECT COMMUNITY_AREA_NAME, HARDSHIP_INDEX FROM CENSUS_DATA WHERE HARDSHIP_INDEX>=1 AND HARDSHIP_INDEX<=10'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+#### BETWEEN AND
+Alternatively, we can use a __BETWEEN...AND__ statement for the same query
+```{r BETWEEN}
+syntax = 'SELECT COMMUNITY_AREA_NAME, HARDSHIP_INDEX FROM CENSUS_DATA WHERE HARDSHIP_INDEX BETWEEN 1 AND 10'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+### OR sets
+If we want to retrieve data using a set of values, the OR operator comes in handy. It follows the same syntax as AND. If we want a community with 6 or 10 for HARDSHIP_INDEX, we can do the following:
+```{r OR}
+syntax = 'SELECT COMMUNITY_AREA_NAME, HARDSHIP_INDEX FROM CENSUS_DATA WHERE HARDSHIP_INDEX = 6 OR HARDSHIP_INDEX = 10'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+#### IN
+Similarly, we can also use the IN operator, which is more efficient to type if we have many values to choose from
+```{r IN}
+syntax = 'SELECT COMMUNITY_AREA_NAME, HARDSHIP_INDEX FROM CENSUS_DATA WHERE HARDSHIP_INDEX IN (6,7,10)'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+### ORDER BY
+This clause is used for sorting results. The syntax is _SELECT * FROM TABLE_ **ORDER BY COL** where COL is the column name, or column number. To order in descending order, add **DESC** after specifying the column. For instance, if we want the top 5 communities by HARDSHIP_INDEX, we can do the following
+```{r ORDER}
+syntax = 'SELECT COMMUNITY_AREA_NAME, HARDSHIP_INDEX FROM CENSUS_DATA ORDER BY 2 DESC LIMIT 5'
+df = sqldf(syntax)
+datatable(df,options=list(scrollX=T))
+```
+
+
+
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
